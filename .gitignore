@@ -1,0 +1,4 @@
+.idea/
+geckodriver.log
+selenium-server-standalone-3.14.0.jar
+users_original.json
