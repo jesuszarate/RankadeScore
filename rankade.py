@@ -2,20 +2,31 @@ import time
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.chrome.options import Options
 import json
 
 
 class Rankade:
 
-    def __init__(self, username, password):
-        self.driver = webdriver.Chrome()
-        self.login(username, password)
+    def __init__(self, username, password, env='prod'):
+        self.rankade = 'https://rankade.com'
+        self.dashboard = self.rankade + '/#/group/WkMK9GYyb2o/DlLprOnOKM7'
+        self.signin = self.rankade + '/signin/'
 
+        if env == 'prod':
+            options = Options()
+            options.add_argument("--headless")
+            self.driver = webdriver.Chrome(options=options)
+        else:
+            self.driver = webdriver.Chrome()
+
+
+        self.login(username, password)
         self.users = self.load_users('users.json')
         print(self.users)
 
     def login(self, username, password):
-        self.driver.get('https://rankade.com/signin/')
+        self.driver.get(self.signin)
 
         self.driver.find_element_by_class_name('sign-button')
 
@@ -24,10 +35,10 @@ class Rankade:
 
         _password = self.driver.find_element_by_name('password')
         _password.send_keys(password)
-
+        time.sleep(2)
         _password.submit()
 
-        self.driver.get('https://rankade.com/#/group/WkMK9GYyb2o/DlLprOnOKM7')
+        self.driver.get(self.dashboard)
 
         self.clearPopUps()
 
@@ -61,7 +72,7 @@ class Rankade:
     def clearPopUps(self):
         closed = False
         try:
-            time.sleep(5)  # Let the user actually see something!
+            time.sleep(5)
             self.driver.find_element_by_xpath('//*[@id="goProGroupModal"]/div/div/div[1]/button').click()
             closed = True
         except:
@@ -94,8 +105,6 @@ class Rankade:
                 actions.perform()
 
     def select_user(self, user_id, user_spot):
-        time.sleep(3)
-
         print("Finding dropdown")
 
         dropdown = None
@@ -142,15 +151,21 @@ def read_match(filename='match.txt'):
         scores = list()
         for score in line[1].split(';'):
             ss = score.split(',')
-            scores.append((ss[0], ss[1]))
+            if len(ss) == 2:
+                scores.append((ss[0], ss[1]))
         print(scores)
 
     return players, scores
 
 
 if __name__ == '__main__':
-    r = Rankade('fake.emai.@gmail.com', 'notarealpassword')
+    r = Rankade('', '')
     players, scores = read_match()
 
-    r.add_matches(players, scores)
-    r.driver.quit()
+    try:
+        r.add_matches(players, scores)
+        r.driver.quit()
+        print("SUCCESSFULLY ADDED MATCHES!")
+    except:
+        print("FAILED TO ADD MATCHES")
+

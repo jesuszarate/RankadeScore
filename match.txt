@@ -1,1 +1,1 @@
-@chuy,@jeff,@dave,@marshall=0,1;1,0;0,0
+@chuy,@jeff,@dave,@marshall=0,0;
